@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import metrics
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 
 train_data = np.load("train.npy", allow_pickle=True)
 test_data = np.load("test.npy", allow_pickle=True)
@@ -11,7 +13,7 @@ y_train_loaded = train_data.item().get("y_train")
 X_test = test_data.item().get("X_test")
 y_test = test_data.item().get("y_test")
 
-print(X_test)
+#print(X_test)
 
 X_train = np.copy(X_train_loaded)
 y_train = np.copy(y_train_loaded)
@@ -30,16 +32,16 @@ classifier = RandomForestClassifier(n_estimators=30, random_state=5)
 # Entrenar el clasificador
 classifier.fit(X_train, y_train)
 
-# Hacer predicciones en el conjunto de pruebas
+#print(y_test)
 
+# Hacer predicciones en el conjunto de pruebas
 y_prediction = classifier.predict(X_test)
 
 # Calcular la precisión del modelo
 accuracy = metrics.accuracy_score(y_test, y_prediction)
-print("Accuracy:", accuracy)
+print("Precisión del modelo:", accuracy)
 
-print(y_test)
-print(y_prediction)
+#print(y_prediction)
 
 # Otras funciones disponibles
 classifier.apply(X.values)
@@ -49,11 +51,19 @@ classifier.predict_proba(X.values)
 classifier.score(X.values, y.values)
 
 np.save("train.npy", {
-    "X_train": np.concatenate((X_train_loaded, X_train)),
-    "y_train": np.concatenate((y_train_loaded, y_train))
+    "X_train": X_train,
+    "y_train": y_train
 })
 
 np.save("test.npy", {
     "X_test": X_test,
     "y_test": y_test
 })
+
+conf_matrix = confusion_matrix(y_test, (y_prediction > 0.5))
+
+disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix,
+                              display_labels=['Spam', 'No Spam'])
+
+disp.plot()
+plt.show()
